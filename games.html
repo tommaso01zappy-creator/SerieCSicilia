@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Inserisci Partita – Serie C Baseball</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="firebase.js"></script>
+
+  <style>
+    body { padding: 20px; }
+    input, select { padding: 8px; margin: 5px 0; width: 200px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+
+<script>
+  if (sessionStorage.getItem("admin") !== "ok") {
+    location = "admin-login.html";
+  }
+</script>
+
+<h1>Inserisci Partita</h1>
+
+<label>Data</label><br>
+<input type="date" id="date"><br><br>
+
+<label>Squadra Casa</label><br>
+<select id="home">
+  <option>Bulldogs</option>
+  <option>Happy Friends</option>
+  <option>Randazzese</option>
+  <option>UNIME</option>
+</select><br>
+
+<label>Punti Casa</label><br>
+<input type="number" id="homeRuns" min="0"><br><br>
+
+<label>Squadra Ospite</label><br>
+<select id="away">
+  <option>Bulldogs</option>
+  <option>Happy Friends</option>
+  <option>Randazzese</option>
+  <option>UNIME</option>
+</select><br>
+
+<label>Punti Ospite</label><br>
+<input type="number" id="awayRuns" min="0"><br><br>
+
+<button onclick="saveGame()">Salva Partita</button>
+
+<script>
+  async function saveGame() {
+    const date = document.getElementById("date").value;
+    const home = document.getElementById("home").value;
+    const away = document.getElementById("away").value;
+    const homeRuns = +document.getElementById("homeRuns").value;
+    const awayRuns = +document.getElementById("awayRuns").value;
+
+    if (!date) return alert("Inserisci la data");
+    if (home === away) return alert("Le squadre devono essere diverse");
+
+    let winner, loser;
+
+    if (homeRuns > awayRuns) {
+      winner = home;
+      loser = away;
+    } else if (awayRuns > homeRuns) {
+      winner = away;
+      loser = home;
+    } else {
+      return alert("Non sono ammessi pareggi");
+    }
+
+    const game = {
+      date,
+      home,
+      away,
+      homeRuns,
+      awayRuns,
+      winner,
+      loser
+    };
+
+    await db.collection("games").add(game);
+
+    alert("Partita salvata correttamente!");
+
+    // reset campi
+    document.getElementById("homeRuns").value = "";
+    document.getElementById("awayRuns").value = "";
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Elenco Partite – Serie C Baseball</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="firebase.js"></script>
+
+  <style>
+    body { padding: 20px; }
+    .game {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .winner {
+      font-weight: bold;
+      color: green;
+    }
+    .loser {
+      color: #444;
+    }
+    h2 {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Partite Giocate</h1>
+
+<div id="games"></div>
+
+<script>
+  async function loadGames() {
+    const snap = await db.collection("games").get();
+    let games = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // ordina per data (più recente prima)
+    games.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const container = document.getElementById("games");
+
+    if (games.length === 0) {
+      container.innerHTML = "<p>Nessuna partita registrata.</p>";
+      return;
+    }
+
+    container.innerHTML = games.map(g => `
+      <div class="game">
+        <h2>${g.date}</h2>
+        <div>
+          <span class="${g.winner === g.home ? 'winner' : 'loser'}">
+            ${g.home} (${g.homeRuns})
+          </span>
+          vs
+          <span class="${g.winner === g.away ? 'winner' : 'loser'}">
+            ${g.away} (${g.awayRuns})
+          </span>
+        </div>
+        <p><strong>Vincitore:</strong> ${g.winner}</p>
+      </div>
+    `).join("");
+  }
+
+  loadGames();
+</script>
+
+</body>
+</html>

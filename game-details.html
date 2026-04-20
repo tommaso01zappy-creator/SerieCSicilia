@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Dettagli Partita – Serie C Baseball</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="firebase.js"></script>
+
+  <style>
+    body { padding: 20px; }
+    .score {
+      font-size: 26px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .winner {
+      color: green;
+      font-weight: bold;
+    }
+    .loser {
+      color: #444;
+    }
+    .box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Dettagli Partita</h1>
+
+<div id="content">Caricamento...</div>
+
+<script>
+  async function loadGame() {
+    const id = new URLSearchParams(location.search).get("id");
+    if (!id) {
+      document.getElementById("content").innerHTML = "<p>ID partita non trovato.</p>";
+      return;
+    }
+
+    const doc = await db.collection("games").doc(id).get();
+    if (!doc.exists) {
+      document.getElementById("content").innerHTML = "<p>Partita non trovata.</p>";
+      return;
+    }
+
+    const g = doc.data();
+
+    const homeClass = g.winner === g.home ? "winner" : "loser";
+    const awayClass = g.winner === g.away ? "winner" : "loser";
+
+    document.getElementById("content").innerHTML = `
+      <h2>${g.date}</h2>
+
+      <div class="score">
+        <span class="${homeClass}">${g.home} (${g.homeRuns})</span>
+        &nbsp;vs&nbsp;
+        <span class="${awayClass}">${g.away} (${g.awayRuns})</span>
+      </div>
+
+      <p><strong>Vincitore:</strong> ${g.winner}</p>
+
+      <div class="box">
+        <h3>Boxscore</h3>
+        <p><strong>${g.home}</strong>: ${g.homeRuns} punti</p>
+        <p><strong>${g.away}</strong>: ${g.awayRuns} punti</p>
+      </div>
+
+      <br>
+      <a href="games-list.html">← Torna alla lista partite</a>
+    `;
+  }
+
+  loadGame();
+</script>
+
+</body>
+</html>
